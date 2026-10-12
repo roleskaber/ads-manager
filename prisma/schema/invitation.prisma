@@ -1,0 +1,18 @@
+model Invitation {
+  id          String    @id @default(cuid())
+  email       String
+  role        UserRole  @default(MEMBER)
+  tokenHash   String    @unique
+  companyId   String
+  invitedById String?
+  expiresAt   DateTime
+  acceptedAt  DateTime?
+  createdAt   DateTime  @default(now())
+
+  company   Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  invitedBy User?   @relation("SentInvitations", fields: [invitedById], references: [id], onDelete: SetNull)
+
+  @@index([companyId])
+  @@index([companyId, email])
+  @@map("invitations")
+}
