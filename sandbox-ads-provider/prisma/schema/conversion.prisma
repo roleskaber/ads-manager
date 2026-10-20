@@ -1,0 +1,19 @@
+/// Conversion attributed to a click (last click). Reported on the click date, like Google Ads.
+model Conversion {
+  id                 String           @id @default(cuid())
+  conversionActionId BigInt
+  gclid              String
+  source             ConversionSource
+  valueMicros        BigInt
+  currencyCode       String
+  orderId            String?
+  conversionAt       DateTime
+  createdAt          DateTime         @default(now())
+
+  conversionAction ConversionAction @relation(fields: [conversionActionId], references: [id], onDelete: Cascade)
+  click            Click            @relation(fields: [gclid], references: [gclid], onDelete: Cascade)
+
+  @@unique([conversionActionId, orderId])
+  @@index([gclid])
+  @@map("conversions")
+}

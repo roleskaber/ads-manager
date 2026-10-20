@@ -1,0 +1,20 @@
+/// A target action (funnel step) performed by a visitor, attributed to a touchpoint at ingest time.
+model TrackedEvent {
+  id           String   @id @default(cuid())
+  companyId    String
+  visitorId    String
+  touchpointId String?
+  name         String
+  url          String?
+  properties   Json?
+  occurredAt   DateTime
+  receivedAt   DateTime @default(now())
+
+  company    Company     @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  visitor    Visitor     @relation(fields: [visitorId], references: [id], onDelete: Cascade)
+  touchpoint Touchpoint? @relation(fields: [touchpointId], references: [id], onDelete: SetNull)
+
+  @@index([companyId, name, occurredAt])
+  @@index([visitorId, occurredAt])
+  @@map("tracked_events")
+}

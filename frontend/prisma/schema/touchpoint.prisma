@@ -1,0 +1,25 @@
+/// One arrival of a visitor from a marketing source (ad click, email, search, referral...).
+model Touchpoint {
+  id          String         @id @default(cuid())
+  companyId   String
+  visitorId   String
+  channel     TrafficChannel
+  source      String
+  medium      String?
+  campaign    String?
+  content     String?
+  term        String?
+  clickId     String?
+  clickIdType String?
+  referrer    String?
+  landingUrl  String?
+  occurredAt  DateTime
+
+  company Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  visitor Visitor        @relation(fields: [visitorId], references: [id], onDelete: Cascade)
+  events  TrackedEvent[]
+
+  @@index([visitorId, occurredAt])
+  @@index([companyId, occurredAt])
+  @@map("touchpoints")
+}

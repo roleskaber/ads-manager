@@ -1,0 +1,23 @@
+/// Daily delivery per ad group (UTC days): simulated traffic plus real clicks and conversions.
+/// Simulated delivery is accrued in many small slices, so counters stay unrounded to avoid
+/// rounding drift; reports round them.
+model AdGroupMetric {
+  id                     String   @id @default(cuid())
+  customerId             String
+  campaignId             BigInt
+  adGroupId              BigInt
+  date                   DateTime @db.Date
+  impressions            Float    @default(0)
+  clicks                 Float    @default(0)
+  costMicros             Float    @default(0)
+  conversions            Float    @default(0)
+  conversionsValueMicros Float    @default(0)
+  updatedAt              DateTime @updatedAt
+
+  adGroup AdGroup @relation(fields: [adGroupId], references: [id], onDelete: Cascade)
+
+  @@unique([adGroupId, date])
+  @@index([customerId, date])
+  @@index([campaignId, date])
+  @@map("ad_group_metrics")
+}

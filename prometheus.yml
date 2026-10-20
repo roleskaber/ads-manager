@@ -1,0 +1,12 @@
+global:
+  scrape_interval: 15s
+
+scrape_configs:
+  - job_name: ads-manager
+    metrics_path: /api/metrics
+    # If METRICS_TOKEN is set in the app's .env, uncomment and use the same value:
+    # authorization:
+    #   credentials: your-metrics-token
+    static_configs:
+      # Prometheus in Docker reaching the Next.js app running on the host
+      - targets: ["host.docker.internal:3000"]

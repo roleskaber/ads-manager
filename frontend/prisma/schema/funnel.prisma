@@ -1,0 +1,15 @@
+/// Ordered sequence of event names, e.g. ["page_view", "lead_form_submitted", "deal_won"].
+model Funnel {
+  id                   String   @id @default(cuid())
+  companyId            String
+  name                 String
+  steps                String[]
+  conversionWindowDays Int      @default(30)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+  @@map("funnels")
+}

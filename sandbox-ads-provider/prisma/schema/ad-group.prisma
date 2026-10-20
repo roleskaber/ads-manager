@@ -1,0 +1,17 @@
+model AdGroup {
+  id           BigInt       @id @default(autoincrement())
+  campaignId   BigInt
+  name         String
+  status       EntityStatus @default(ENABLED)
+  cpcBidMicros BigInt
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  campaign Campaign           @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  criteria AdGroupCriterion[]
+  ads      AdGroupAd[]
+  metrics  AdGroupMetric[]
+
+  @@index([campaignId])
+  @@map("ad_groups")
+}

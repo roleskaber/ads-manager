@@ -10,6 +10,42 @@ services:
       - "5434:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+      # Creates the ads_sandbox database on a fresh volume (see the script for existing volumes).
+      - ./docker/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ads_manager -d ads_manager"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  sandbox-ads-provider:
+    build: ./sandbox-ads-provider
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql://ads_sandbox:ads_sandbox@db:5432/ads_sandbox
+      SANDBOX_API_TOKEN: ${SANDBOX_API_TOKEN:-sandbox-dev-token}
+      PORT: 4000
+    ports:
+      - "4000:4000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./web.yml:/etc/prometheus/web.yml:ro
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--web.config.file=/etc/prometheus/web.yml'
+      - '--storage.tsdb.path=/prometheus'
+    restart: unless-stopped
 
 volumes:
   pgdata:
+  prometheus_data:

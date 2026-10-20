@@ -1,0 +1,26 @@
+model Campaign {
+  id                     BigInt                 @id @default(autoincrement())
+  customerId             String
+  campaignBudgetId       BigInt                 @unique
+  name                   String
+  status                 EntityStatus           @default(PAUSED)
+  advertisingChannelType AdvertisingChannelType
+  biddingStrategyType    BiddingStrategyType
+  targetCpaMicros        BigInt?
+  startDate              DateTime               @db.Date
+  /// Inclusive.
+  endDate                DateTime?              @db.Date
+  /// Delivery has been simulated up to this moment. Every change first accrues delivery
+  /// with the old settings and then moves this forward.
+  accruedAt              DateTime               @default(now())
+  createdAt              DateTime               @default(now())
+  updatedAt              DateTime               @updatedAt
+
+  customer Customer            @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  budget   CampaignBudget      @relation(fields: [campaignBudgetId], references: [id])
+  criteria CampaignCriterion[]
+  adGroups AdGroup[]
+
+  @@index([customerId, status])
+  @@map("campaigns")
+}

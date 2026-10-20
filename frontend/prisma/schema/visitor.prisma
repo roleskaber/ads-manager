@@ -1,0 +1,18 @@
+/// A person seen by the tracker. Identified by a browser-generated anonymousId
+/// and optionally linked to a CRM/customer id (externalId) once known.
+model Visitor {
+  id          String   @id @default(cuid())
+  companyId   String
+  anonymousId String
+  externalId  String?
+  firstSeenAt DateTime @default(now())
+  lastSeenAt  DateTime @default(now())
+
+  company     Company        @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  touchpoints Touchpoint[]
+  events      TrackedEvent[]
+
+  @@unique([companyId, anonymousId])
+  @@index([companyId, externalId])
+  @@map("visitors")
+}

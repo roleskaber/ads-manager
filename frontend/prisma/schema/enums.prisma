@@ -1,0 +1,67 @@
+/// OWNER — one per company, full control including ownership transfer.
+/// ADMIN — manages members and viewers, cannot touch owner or other admins.
+/// MEMBER — works with campaigns and reports.
+/// VIEWER — read-only access.
+enum UserRole {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+enum AdProvider {
+  SANDBOX
+  GOOGLE_ADS
+}
+
+enum CampaignChannel {
+  SEARCH
+  DISPLAY
+  SHOPPING
+  VIDEO
+}
+
+/// DRAFT exists only on our side; the rest mirror Google Ads campaign statuses.
+enum CampaignStatus {
+  DRAFT
+  ENABLED
+  PAUSED
+  REMOVED
+}
+
+enum BiddingStrategy {
+  MANUAL_CPC
+  MAXIMIZE_CLICKS
+  MAXIMIZE_CONVERSIONS
+  TARGET_CPA
+}
+
+enum AdGroupStatus {
+  ENABLED
+  PAUSED
+}
+
+enum KeywordMatchType {
+  EXACT
+  PHRASE
+  BROAD
+}
+
+enum AdReviewStatus {
+  NOT_SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  DISAPPROVED
+}
+
+/// Marketing channel a touchpoint is classified into.
+enum TrafficChannel {
+  PAID_SEARCH
+  PAID_SOCIAL
+  DISPLAY
+  EMAIL
+  ORGANIC_SEARCH
+  ORGANIC_SOCIAL
+  REFERRAL
+  DIRECT
+}

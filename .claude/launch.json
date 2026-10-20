@@ -4,8 +4,14 @@
     {
       "name": "next-dev",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["dev"],
+      "runtimeArgs": ["--dir", "frontend", "dev"],
       "port": 3000
+    },
+    {
+      "name": "sandbox-ads-provider",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--dir", "sandbox-ads-provider", "dev"],
+      "port": 4000
     }
   ]
 }

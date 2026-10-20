@@ -1,0 +1,17 @@
+/// Keyword (positive or negative) of an ad group.
+model AdGroupCriterion {
+  id           BigInt           @id @default(autoincrement())
+  adGroupId    BigInt
+  keywordText  String
+  matchType    KeywordMatchType
+  negative     Boolean          @default(false)
+  status       EntityStatus     @default(ENABLED)
+  /// Overrides the ad group bid for manual CPC.
+  cpcBidMicros BigInt?
+  createdAt    DateTime         @default(now())
+
+  adGroup AdGroup @relation(fields: [adGroupId], references: [id], onDelete: Cascade)
+
+  @@unique([adGroupId, keywordText, matchType, negative])
+  @@map("ad_group_criteria")
+}

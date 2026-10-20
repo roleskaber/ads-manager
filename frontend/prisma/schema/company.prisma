@@ -1,0 +1,21 @@
+model Company {
+  id          String   @id @default(cuid())
+  name        String
+  slug        String   @unique
+  website     String?
+  /// Public write key used by the tracking snippet and server-side event senders.
+  trackingKey String   @unique @default(dbgenerated("replace(gen_random_uuid()::text, '-', '')"))
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  users       User[]
+  invitations Invitation[]
+  visitors    Visitor[]
+  touchpoints Touchpoint[]
+  events      TrackedEvent[]
+  funnels     Funnel[]
+  adAccounts  AdAccount[]
+  campaigns   Campaign[]
+
+  @@map("companies")
+}

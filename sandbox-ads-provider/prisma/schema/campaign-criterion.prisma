@@ -1,0 +1,14 @@
+/// Campaign-level targeting. Only location targeting is simulated.
+model CampaignCriterion {
+  id                BigInt   @id @default(autoincrement())
+  campaignId        BigInt
+  /// e.g. "geoTargetConstants/2840" (United States).
+  geoTargetConstant String
+  negative          Boolean  @default(false)
+  createdAt         DateTime @default(now())
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, geoTargetConstant])
+  @@map("campaign_criteria")
+}

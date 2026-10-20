@@ -1,0 +1,19 @@
+/// Google Ads account. The id is the 10-digit customer id (shown as 123-456-7890).
+model Customer {
+  id              String   @id
+  descriptiveName String
+  currencyCode    String   @default("USD")
+  timeZone        String   @default("UTC")
+  /// Prepaid wallet: ads stop serving when it reaches zero.
+  balanceMicros   BigInt   @default(0)
+  createdAt       DateTime @default(now())
+
+  budgets           CampaignBudget[]
+  campaigns         Campaign[]
+  conversionActions ConversionAction[]
+  payments          Payment[]
+  dailyCharges      DailyCharge[]
+  clicks            Click[]
+
+  @@map("customers")
+}

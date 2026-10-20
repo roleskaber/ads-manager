@@ -1,0 +1,77 @@
+/// Shared by campaigns, ad groups, criteria, ads and conversion actions, like in Google Ads.
+enum EntityStatus {
+  ENABLED
+  PAUSED
+  REMOVED
+}
+
+enum AdvertisingChannelType {
+  SEARCH
+  DISPLAY
+  SHOPPING
+  VIDEO
+}
+
+enum BiddingStrategyType {
+  MANUAL_CPC
+  MAXIMIZE_CLICKS
+  MAXIMIZE_CONVERSIONS
+  TARGET_CPA
+}
+
+enum KeywordMatchType {
+  EXACT
+  PHRASE
+  BROAD
+}
+
+enum PolicyReviewStatus {
+  REVIEW_IN_PROGRESS
+  REVIEWED
+}
+
+/// APPROVED_LIMITED serves with reduced reach (restricted topics such as alcohol).
+enum PolicyApprovalStatus {
+  UNKNOWN
+  APPROVED
+  APPROVED_LIMITED
+  DISAPPROVED
+}
+
+enum ConversionActionType {
+  /// Counted by the conversion tag (gtag / Tag Manager).
+  WEBPAGE
+  /// Imported through uploadClickConversions.
+  UPLOAD_CLICKS
+}
+
+enum ConversionActionCategory {
+  DEFAULT
+  PAGE_VIEW
+  PURCHASE
+  SIGNUP
+  SUBMIT_LEAD_FORM
+  CONTACT
+  BOOK_APPOINTMENT
+}
+
+enum ConversionCountingType {
+  ONE_PER_CLICK
+  MANY_PER_CLICK
+}
+
+enum ConversionSource {
+  TAG
+  UPLOAD
+}
+
+enum PaymentMethodType {
+  CARD
+  BANK_TRANSFER
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  DECLINED
+}

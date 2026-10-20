@@ -1,0 +1,15 @@
+/// Daily budget. Like non-shared budgets in Google Ads, one budget serves one campaign.
+model CampaignBudget {
+  id           BigInt       @id @default(autoincrement())
+  customerId   String
+  name         String
+  amountMicros BigInt
+  status       EntityStatus @default(ENABLED)
+  createdAt    DateTime     @default(now())
+
+  customer Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  campaign Campaign?
+
+  @@index([customerId])
+  @@map("campaign_budgets")
+}

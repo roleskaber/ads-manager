@@ -1,0 +1,120 @@
+/// Connected ad platform account. SANDBOX is our simulated network; real providers plug in next to it.
+model AdAccount {
+  id         String     @id @default(cuid())
+  companyId  String
+  provider   AdProvider
+  externalId String
+  name       String
+  currency   String     @default("USD")
+  timeZone   String     @default("UTC")
+  createdAt  DateTime   @default(now())
+
+  company   Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  campaigns Campaign[]
+
+  @@unique([provider, externalId])
+  @@unique([companyId, provider])
+  @@map("ad_accounts")
+}
+
+/// Mirrors a Google Ads campaign: budget and bidding live here, targeting and creatives in ad groups.
+model Campaign {
+  id                String          @id @default(cuid())
+  companyId         String
+  adAccountId       String
+  externalId        String?
+  name              String
+  channel           CampaignChannel
+  status            CampaignStatus  @default(DRAFT)
+  biddingStrategy   BiddingStrategy
+  /// Money is stored in micros (1 unit = 1_000_000), like the Google Ads API.
+  dailyBudgetMicros BigInt
+  targetCpaMicros   BigInt?
+  startDate         DateTime        @db.Date
+  endDate           DateTime?       @db.Date
+  locations         String[]
+  launchedAt        DateTime?
+  /// Delivery has been accrued up to this moment; null while the campaign is not serving.
+  accruedAt         DateTime?
+  createdById       String?
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  company   Company          @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  adAccount AdAccount        @relation(fields: [adAccountId], references: [id], onDelete: Cascade)
+  createdBy User?            @relation("CreatedCampaigns", fields: [createdById], references: [id], onDelete: SetNull)
+  adGroups  AdGroup[]
+  metrics   CampaignMetric[]
+
+  @@index([companyId, status])
+  @@map("campaigns")
+}
+
+model AdGroup {
+  id           String        @id @default(cuid())
+  campaignId   String
+  externalId   String?
+  name         String
+  status       AdGroupStatus @default(ENABLED)
+  cpcBidMicros BigInt
+  createdAt    DateTime      @default(now())
+
+  campaign Campaign  @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+  keywords Keyword[]
+  ads      Ad[]
+
+  @@index([campaignId])
+  @@map("ad_groups")
+}
+
+model Keyword {
+  id        String           @id @default(cuid())
+  adGroupId String
+  text      String
+  matchType KeywordMatchType
+
+  adGroup AdGroup @relation(fields: [adGroupId], references: [id], onDelete: Cascade)
+
+  @@unique([adGroupId, text, matchType])
+  @@map("keywords")
+}
+
+/// Responsive search ad: the network mixes headlines and descriptions itself.
+model Ad {
+  id           String         @id @default(cuid())
+  adGroupId    String
+  externalId   String?
+  headlines    String[]
+  descriptions String[]
+  finalUrl     String
+  reviewStatus AdReviewStatus @default(NOT_SUBMITTED)
+  policyTopics String[]
+  submittedAt  DateTime?
+  reviewedAt   DateTime?
+  createdAt    DateTime       @default(now())
+
+  adGroup AdGroup @relation(fields: [adGroupId], references: [id], onDelete: Cascade)
+
+  @@index([adGroupId])
+  @@map("ads")
+}
+
+/// Daily delivery totals. `servedFraction` is the share of the day the campaign was serving,
+/// so a partially served day can be recomputed exactly instead of accumulating rounding drift.
+model CampaignMetric {
+  id                    String   @id @default(cuid())
+  campaignId            String
+  date                  DateTime @db.Date
+  servedFraction        Float    @default(0)
+  impressions           Int      @default(0)
+  clicks                Int      @default(0)
+  costMicros            BigInt   @default(0)
+  conversions           Float    @default(0)
+  conversionValueMicros BigInt   @default(0)
+  updatedAt             DateTime @updatedAt
+
+  campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
+
+  @@unique([campaignId, date])
+  @@map("campaign_metrics")
+}

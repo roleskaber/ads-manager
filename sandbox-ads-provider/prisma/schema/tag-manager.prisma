@@ -1,0 +1,119 @@
+/// Tag Manager mirrors the GTM API: account → container → workspace (draft) → versions.
+model TagManagerAccount {
+  id        BigInt   @id @default(autoincrement())
+  name      String
+  createdAt DateTime @default(now())
+
+  containers Container[]
+
+  @@map("tm_accounts")
+}
+
+model Container {
+  id            BigInt   @id @default(autoincrement())
+  accountId     BigInt
+  name          String
+  /// GTM-XXXXXXX, used in the install snippet.
+  publicId      String   @unique
+  domainName    String[]
+  liveVersionId BigInt?  @unique
+  createdAt     DateTime @default(now())
+
+  account     TagManagerAccount  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  workspaces  Workspace[]
+  versions    ContainerVersion[] @relation("ContainerVersions")
+  liveVersion ContainerVersion?  @relation("LiveVersion", fields: [liveVersionId], references: [id])
+  loads       ContainerLoad[]
+
+  @@map("tm_containers")
+}
+
+model Workspace {
+  id          BigInt   @id @default(autoincrement())
+  containerId BigInt
+  name        String
+  description String?
+  createdAt   DateTime @default(now())
+
+  container Container   @relation(fields: [containerId], references: [id], onDelete: Cascade)
+  tags      Tag[]
+  triggers  Trigger[]
+  variables Variable[]
+
+  @@map("tm_workspaces")
+}
+
+/// Types follow GTM: awct (Google Ads conversion), gclidw (conversion linker), html (custom HTML).
+model Tag {
+  id                BigInt   @id @default(autoincrement())
+  workspaceId       BigInt
+  name              String
+  type              String
+  parameter         Json     @default("[]")
+  firingTriggerId   BigInt[]
+  blockingTriggerId BigInt[]
+  paused            Boolean  @default(false)
+  updatedAt         DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("tm_tags")
+}
+
+/// Types follow GTM: pageview, customEvent, linkClick, formSubmission.
+model Trigger {
+  id                BigInt   @id @default(autoincrement())
+  workspaceId       BigInt
+  name              String
+  type              String
+  filter            Json     @default("[]")
+  customEventFilter Json     @default("[]")
+  updatedAt         DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("tm_triggers")
+}
+
+/// Types follow GTM: v (data layer), u (URL), c (constant), k (first-party cookie).
+model Variable {
+  id          BigInt   @id @default(autoincrement())
+  workspaceId BigInt
+  name        String
+  type        String
+  parameter   Json     @default("[]")
+  updatedAt   DateTime @updatedAt
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@map("tm_variables")
+}
+
+/// Immutable snapshot of a workspace; publishing makes it live.
+model ContainerVersion {
+  id          BigInt   @id @default(autoincrement())
+  containerId BigInt
+  name        String
+  description String?
+  /// Compiled tags, triggers and variables served by gtm.js.
+  config      Json
+  createdAt   DateTime @default(now())
+
+  container Container  @relation("ContainerVersions", fields: [containerId], references: [id], onDelete: Cascade)
+  liveIn    Container? @relation("LiveVersion")
+
+  @@index([containerId])
+  @@map("tm_container_versions")
+}
+
+/// gtm.js downloads per container per UTC day.
+model ContainerLoad {
+  containerId BigInt
+  date        DateTime @db.Date
+  count       Int      @default(0)
+
+  container Container @relation(fields: [containerId], references: [id], onDelete: Cascade)
+
+  @@id([containerId, date])
+  @@map("tm_container_loads")
+}

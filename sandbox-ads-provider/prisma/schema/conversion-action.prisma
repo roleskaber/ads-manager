@@ -1,0 +1,22 @@
+model ConversionAction {
+  id                             BigInt                   @id @default(autoincrement())
+  customerId                     String
+  name                           String
+  type                           ConversionActionType
+  category                       ConversionActionCategory @default(DEFAULT)
+  status                         EntityStatus             @default(ENABLED)
+  /// Conversion label used by the tag together with the conversion id (AW-<customer id>).
+  label                          String                   @unique
+  countingType                   ConversionCountingType   @default(ONE_PER_CLICK)
+  defaultValueMicros             BigInt?
+  defaultCurrencyCode            String                   @default("USD")
+  alwaysUseDefaultValue          Boolean                  @default(false)
+  clickThroughLookbackWindowDays Int                      @default(30)
+  createdAt                      DateTime                 @default(now())
+
+  customer    Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  conversions Conversion[]
+
+  @@index([customerId])
+  @@map("conversion_actions")
+}

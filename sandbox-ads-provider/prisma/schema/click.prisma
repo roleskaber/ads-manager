@@ -1,0 +1,22 @@
+/// A real ad click from the sandbox results page. The gclid is appended to the landing URL.
+model Click {
+  gclid       String   @id
+  customerId  String
+  campaignId  BigInt
+  adGroupId   BigInt
+  adId        BigInt
+  criterionId BigInt?
+  query       String
+  costMicros  BigInt
+  /// Clicks repeated by the same visitor within a short window are free and flagged invalid.
+  invalid     Boolean  @default(false)
+  visitorHash String
+  clickedAt   DateTime @default(now())
+
+  customer    Customer     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  conversions Conversion[]
+
+  @@index([customerId, clickedAt])
+  @@index([adId, visitorHash, clickedAt])
+  @@map("clicks")
+}
