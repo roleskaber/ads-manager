@@ -24,6 +24,8 @@ export type AccrualInput = {
   campaigns: CampaignSnapshot[];
   /** Cost already recorded for a campaign on a UTC day (YYYY-MM-DD). */
   spentMicros: (campaignId: bigint, date: string) => number;
+  /** Simulated seconds of traffic per real second (daily budgets still cap each day). */
+  speed?: number;
 };
 
 export type MetricIncrement = { campaignId: bigint; adGroupId: bigint; date: Date; delivery: Delivery };
@@ -39,7 +41,7 @@ export type AccrualPlan = {
  * capped by what is left of its daily budget; together they are capped by the wallet balance,
  * shared proportionally day by day so that a depleted wallet stops every campaign at once.
  */
-export function planAccrual({ now, balanceMicros, campaigns, spentMicros }: AccrualInput): AccrualPlan {
+export function planAccrual({ now, balanceMicros, campaigns, spentMicros, speed = 1 }: AccrualInput): AccrualPlan {
   const byDay = new Map<string, { campaign: CampaignSnapshot; slice: DaySlice }[]>();
   for (const campaign of campaigns) {
     const window = servingWindow(campaign, campaign.accruedAt, now);
@@ -61,7 +63,7 @@ export function planAccrual({ now, balanceMicros, campaigns, spentMicros }: Accr
         campaignId: campaign.id,
         adGroupId,
         date: slice.date,
-        delivery: scaleDelivery(delivery, slice.fraction),
+        delivery: scaleDelivery(delivery, slice.fraction * speed),
       }));
       const cost = sumCost(slices);
       const budgetLeft = Math.max(0, Number(campaign.budgetMicros) - spentMicros(campaign.id, key));

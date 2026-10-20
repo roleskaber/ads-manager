@@ -17,8 +17,6 @@ export function resolveBidding(input: BiddingInput): Bidding | null {
     throw new InvalidArgumentError("Only one bidding strategy can be set", { biddingError: "BIDDING_STRATEGY_AND_BUDGET_MUST_BE_ALIGNED" });
   }
   switch (set[0]) {
-    case undefined:
-      return null;
     case "manualCpc":
       return { type: "MANUAL_CPC", targetCpaMicros: null };
     case "maximizeClicks":
@@ -30,6 +28,8 @@ export function resolveBidding(input: BiddingInput): Bidding | null {
       if (!target) throw new InvalidArgumentError("targetCpa.targetCpaMicros is required", { biddingError: "INVALID_TARGET_CPA" });
       return { type: "TARGET_CPA", targetCpaMicros: target };
     }
+    default:
+      return null;
   }
 }
 

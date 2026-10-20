@@ -35,16 +35,18 @@ export class AdGroupCriterionHandler implements ResourceHandler {
       throw new PreconditionError("Negative keywords cannot have bids", { criterionError: "CANNOT_BID_MODIFY_NEGATIVE_CRITERION" });
     }
 
-    const criterion = await tx.adGroupCriterion.create({
-      data: {
-        adGroupId: adGroup.id,
-        keywordText: normalizeKeyword(input.keyword.text),
-        matchType: input.keyword.matchType,
-        negative: input.negative,
-        status: input.status,
-        cpcBidMicros: input.cpcBidMicros ?? null,
-      },
-    });
+    const key = {
+      adGroupId: adGroup.id,
+      keywordText: normalizeKeyword(input.keyword.text),
+      matchType: input.keyword.matchType,
+      negative: input.negative,
+    };
+    const fields = { status: input.status, cpcBidMicros: input.cpcBidMicros ?? null };
+    // Re-adding a removed keyword brings it back instead of clashing with the old row.
+    const removed = await tx.adGroupCriterion.findFirst({ where: { ...key, status: "REMOVED" } });
+    const criterion = removed
+      ? await tx.adGroupCriterion.update({ where: { id: removed.id }, data: fields })
+      : await tx.adGroupCriterion.create({ data: { ...key, ...fields } });
     return resourceName.adGroupCriterion(customerId, adGroup.id, criterion.id);
   }
 

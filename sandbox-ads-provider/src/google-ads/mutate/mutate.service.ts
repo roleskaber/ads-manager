@@ -27,7 +27,8 @@ export type MutateResponse = {
   partialFailureError?: { code: number; message: string; details: unknown[] };
 };
 
-class ValidateOnlyRollback extends Error {}
+/** Thrown at the end of a validateOnly transaction to roll everything back. */
+export class ValidateOnlyRollback extends Error {}
 
 /**
  * Runs `{collection}:mutate` like Google Ads: all operations in one transaction (atomic unless

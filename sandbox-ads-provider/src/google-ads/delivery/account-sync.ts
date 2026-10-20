@@ -20,7 +20,9 @@ export function toSnapshot(campaign: CampaignTree, tracksConversions: boolean): 
     id: campaign.id,
     status: campaign.status,
     channel: campaign.advertisingChannelType,
-    biddingStrategy: campaign.biddingStrategyType,
+    // Maximize conversions with a target CPA behaves like target CPA bidding.
+    biddingStrategy:
+      campaign.biddingStrategyType === "MAXIMIZE_CONVERSIONS" && campaign.targetCpaMicros ? "TARGET_CPA" : campaign.biddingStrategyType,
     budgetMicros: campaign.budget.amountMicros,
     targetCpaMicros: campaign.targetCpaMicros,
     startDate: campaign.startDate,
@@ -60,6 +62,7 @@ export class AccountSync {
   constructor(
     private readonly clock: Clock,
     private readonly adReviewDelayMs: number,
+    private readonly deliverySpeed = 1,
   ) {}
 
   async lock(tx: Tx, customerId: string): Promise<boolean> {
@@ -129,6 +132,7 @@ export class AccountSync {
         balanceMicros: customer.balanceMicros,
         campaigns: campaigns.map((campaign) => toSnapshot(campaign, tracked > 0)),
         spentMicros: (campaignId, date) => spentByKey.get(`${campaignId}:${date}`) ?? 0,
+        speed: this.deliverySpeed,
       });
 
       for (const { campaignId, adGroupId, date, delivery } of plan.increments) {
